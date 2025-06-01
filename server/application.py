@@ -3,14 +3,21 @@ import socketserver
 
 PORT = 8000
 
-class TestMe():
+class TestMe:
     def take_five(self):
-        return 4
+        return 5
+
     def port(self):
         return PORT
 
+class CustomHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(str(TestMe().take_five()).encode())
+
 if __name__ == '__main__':
-    Handler = http.server.SimpleHTTPRequestHandler
-    with socketserver.TCPServer(("", PORT), Handler) as http:
+    with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
         print("serving at port", PORT)
-        http.serve_forever()
+        httpd.serve_forever()
