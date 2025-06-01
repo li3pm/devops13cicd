@@ -1,12 +1,33 @@
-build-test:
-  needs: [ lint, unit-tests ]
-  runs-on: ubuntu-24.04
-  steps:
-    - uses: actions/checkout@v4
-    - run: docker build -t test-image ./server --file ./server/dockerfile
-    - run: docker run -d --name app-server8000 -p 8000:8000 --restart unless-stopped test-image
-    - run: sleep 20
-    - run: docker ps -a
-    - run: docker logs app-server8000
-    - run: netstat -tuln | grep 8000 || true
-    - run: curl --retry 3 --retry-delay 5 http://127.0.0.1:8000 || echo "Curl failed"
+name: LINT-TEST-BUILD-CHECK
+on:
+  push:
+    branches: [ dev ]
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: pip install -r server/requirements.txt; pylint server/application.py
+  unit-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: pip install -r server/requirements.txt; pytest --junitxml=junit/test-results.xml server/test_application.py
+  build-test:
+    needs: [ lint, unit-tests ]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t test-image ./server --file ./server/dockerfile
+      - run: docker run -d --name app-server8000 -p 8000:8000 --restart unless-stopped test-image
+      - run: sleep 20
+      - run: docker ps -a
+      - run: docker logs app-server8000
+      - run: netstat -tuln | grep 8000 || true
+      - run: curl --retry 3 --retry-delay 5 http://127.0.0.1:8000 || echo "Curl failed"
