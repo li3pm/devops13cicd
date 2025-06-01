@@ -1,7 +1,7 @@
 name: Publish Docker image
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 permissions:
   contents: write
 jobs:
@@ -35,4 +35,4 @@ jobs:
           git config --global user.name 'Release Runner'
           git config --global user.email 'runner@users.noreply.github.com'
           git commit -am "Release"
-          git push --force origin master:release
+          git push --force origin main:release
