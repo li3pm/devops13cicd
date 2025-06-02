@@ -5,6 +5,7 @@ WORKDIR /usr/local/http-server
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY application.py .
+COPY index.html .
 RUN chown -R runner:runner /usr/local/http-server/
 EXPOSE 8000
 USER runner
