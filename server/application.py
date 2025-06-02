@@ -12,10 +12,16 @@ class TestMe:
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/plain")
-        self.end_headers()
-        self.wfile.write(str(TestMe().take_five()).encode())
+        try:
+            with open('index.html', 'r', encoding='utf-8') as file:
+                content = file.read()
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(content.encode())
+        except FileNotFoundError:
+            self.send_response(404)
+            self.end_headers()
 
 if __name__ == '__main__':
     with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
